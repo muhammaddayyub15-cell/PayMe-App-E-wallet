@@ -11,13 +11,11 @@ const QrisCountdown = ({ expiresAt, onExpire }) => {
 
     useEffect(() => {
         if (!expiresAt) return;
-
         const tick = () => {
             const diff = Math.max(0, Math.floor((new Date(expiresAt) - Date.now()) / 1000));
             setRemaining(diff);
             if (diff === 0) onExpire?.();
         };
-
         tick();
         const id = setInterval(tick, 1000);
         return () => clearInterval(id);
@@ -28,19 +26,27 @@ const QrisCountdown = ({ expiresAt, onExpire }) => {
     const isUrgent = remaining > 0 && remaining <= 60;
 
     return (
-        <p className={`text-sm font-medium ${isUrgent ? 'text-red-500' : 'text-gray-500'}`}>
+        <p className="text-xs font-black" style={{ color: isUrgent ? '#e03060' : '#9888c8' }}>
             {remaining > 0 ? `Berlaku selama ${mm}:${ss}` : 'QR Code sudah kadaluarsa'}
         </p>
     );
 };
 
-const QrisStep = ({ label, icon, active, done }) => (
-    <div className="flex items-center gap-2">
-        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-colors
-            ${done ? 'bg-green-500 text-white' : active ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+const QrisStep = ({ label, icon, done }) => (
+    <div className="flex items-center gap-2.5">
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 transition-colors ${
+            done
+                ? 'text-white clay-icon-green'
+                : 'clay-chip-inactive text-[#6b5fb5]'
+            }`}
+            style={done
+                ? { background: 'linear-gradient(135deg,#90f0c8,#6ee7b7)' }
+                : { background: 'rgba(255,255,255,0.75)' }
+            }
+        >
             {done ? '✓' : icon}
         </div>
-        <span className={`text-sm ${active ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>{label}</span>
+        <span className="text-xs font-semibold" style={{ color: '#4a3a8a' }}>{label}</span>
     </div>
 );
 
@@ -108,8 +114,9 @@ const QrisModal = ({ amount, onClose, onSuccess }) => {
         if (phase === 'loading') {
             return (
                 <div className="flex flex-col items-center gap-4 py-10">
-                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-gray-500">Membuat kode QRIS...</p>
+                    <div className="w-10 h-10 rounded-full animate-spin clay-spinner"
+                        style={{ border: '3px solid #e0dbff', borderTopColor: '#7c6af7' }} />
+                    <p className="text-sm font-semibold" style={{ color: '#9888c8' }}>Membuat kode QRIS...</p>
                 </div>
             );
         }
@@ -117,13 +124,15 @@ const QrisModal = ({ amount, onClose, onSuccess }) => {
         if (phase === 'error') {
             return (
                 <div className="flex flex-col items-center gap-4 py-10 text-center">
-                    <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-                        <span className="text-red-500 text-2xl">!</span>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center clay-icon-red"
+                        style={{ background: 'linear-gradient(135deg,#ffb8b8,#fca5a5)' }}>
+                        <span className="text-lg font-black text-red-700">!</span>
                     </div>
-                    <p className="text-sm text-red-600">{errorMsg}</p>
+                    <p className="text-sm font-bold" style={{ color: '#c03030' }}>{errorMsg}</p>
                     <button
                         onClick={handleClose}
-                        className="mt-2 text-sm font-medium text-blue-600 hover:underline"
+                        className="px-5 py-2 rounded-full text-xs font-black border-none cursor-pointer active:scale-95 transition-all clay-chip-inactive"
+                        style={{ background: 'rgba(255,255,255,0.75)', color: '#5b3fdb' }}
                     >
                         Tutup dan coba lagi
                     </button>
@@ -134,10 +143,14 @@ const QrisModal = ({ amount, onClose, onSuccess }) => {
         if (phase === 'expired') {
             return (
                 <div className="flex flex-col items-center gap-4 py-10 text-center">
-                    <p className="text-sm text-gray-600">Kode QRIS sudah kadaluarsa.</p>
+                    <p className="text-sm font-bold" style={{ color: '#6b5b9e' }}>Kode QRIS sudah kadaluarsa.</p>
                     <button
                         onClick={handleClose}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-6 py-3 rounded-full text-sm font-black text-white border-none cursor-pointer active:scale-95 transition-all hover:-translate-y-0.5"
+                        style={{
+                            background: '#5b3fdb',
+                            boxShadow: '6px 8px 20px rgba(91,63,219,0.35),-3px -3px 10px rgba(255,255,255,0.5),inset 3px 3px 8px #a090ff,inset -3px -3px 8px #3a22b8',
+                        }}
                     >
                         Buat QR baru
                     </button>
@@ -176,7 +189,7 @@ const QrisModal = ({ amount, onClose, onSuccess }) => {
                 />
 
                 {/* Steps */}
-                <div className="w-full bg-gray-50 rounded-xl p-4 flex flex-col gap-3 mt-1">
+                <div className="w-full rounded-2xl p-4 flex flex-col gap-3 mt-1 clay-card" style={{ background: 'rgba(255,255,255,0.6)' }}>
                     <QrisStep icon="1" label="Buka aplikasi m-banking atau e-wallet" active done={false} />
                     <QrisStep icon="2" label="Pilih menu Scan QR / QRIS" active done={false} />
                     <QrisStep icon="3" label="Arahkan kamera ke kode di atas" active done={false} />
@@ -195,19 +208,27 @@ const QrisModal = ({ amount, onClose, onSuccess }) => {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4 font-nunito"
+            style={{ background: 'rgba(80,64,180,0.25)' }}
             onClick={(e) => e.target === e.currentTarget && handleClose()}
         >
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="clay-modal w-full max-w-sm rounded-3xl overflow-hidden"
+                style={{ background: 'linear-gradient(135deg,#f0eeff,#e8e3ff)' }}>
+
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between px-5 py-4"
+                    style={{ borderBottom: '1px solid rgba(160,140,220,0.15)' }}>
                     <div className="flex items-center gap-2">
-                        <span className="text-lg font-semibold text-gray-900">Top-up via QRIS</span>
-                        <span className="text-xs bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full">Tripay</span>
+                        <span className="text-base font-black" style={{ color: '#1a1060' }}>Top-up via QRIS</span>
+                        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full clay-badge"
+                            style={{ background: 'rgba(91,63,219,0.1)', color: '#5b3fdb' }}>
+                            Tripay
+                        </span>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black border-none cursor-pointer transition-all active:scale-95 clay-chip-inactive"
+                        style={{ background: 'rgba(255,255,255,0.7)', color: '#6b5b9e' }}
                         aria-label="Tutup"
                     >
                         ✕

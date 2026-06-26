@@ -64,17 +64,27 @@ export default function RegisterPage() {
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#9b87f5] to-[#7c6af7] flex items-center justify-center mb-4 clay-icon-purple">
+         <div style={{
+            width: 72, height: 72,
+            borderRadius: 24,
+            background: 'linear-gradient(135deg, #7c5ff5, #5b3fdb)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 16,
+            boxShadow: '10px 12px 28px rgba(91,63,219,0.38),-6px -6px 16px #ffffff,inset 5px 5px 14px #a090ff,inset -5px -5px 14px #3a22b8',
+          }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
               <path d="M12 2L6 8h4v6H8l4 8 4-8h-2V8h4L12 2z" fill="white" />
             </svg>
           </div>
-          <h1 className="text-2xl font-black" style={{ color: '#1a1060' }}>Buat Akun</h1>
+          <h1 className="text-2xl font-black text-[#3d2f8a]">Buat Akun</h1>
           <p className="text-sm font-semibold text-[#9589c8] mt-1">Daftar dan mulai pakai PayMe</p>
         </div>
 
         {/* Card */}
-        <div className="clay-card bg-white/75 rounded-3xl p-6">
+        <div className="rounded-3xl p-6" style={{
+          background: '#ffffff',
+          boxShadow: '12px 14px 36px rgba(160,148,220,0.26),-8px -8px 20px #ffffff,inset 6px 6px 18px rgba(255,255,255,0.98),inset -6px -6px 18px rgba(160,140,220,0.26)'
+        }}>
 
           <div className="flex flex-col gap-4">
             <Input

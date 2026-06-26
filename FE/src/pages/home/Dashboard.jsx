@@ -41,15 +41,15 @@ function StatsRow({ transactions }) {
 
   return (
     <div className="grid grid-cols-2 gap-3 mx-4 mb-5">
-      <div className="clay-card bg-white/75 rounded-3xl p-4">
-        <div className="text-[10px] font-black text-[#9589c8] tracking-wide mb-1">MASUK</div>
-        <div className="text-lg font-black text-[#3d2f8a]">{formatRupiahShort(income)}</div>
-        <div className="text-[10px] font-bold text-[#10b981] mt-0.5">{thisMonth.length} transaksi</div>
+      <div className="clay-card bg-white rounded-3xl p-4">
+        <div className="text-[10px] font-black tracking-wide mb-1" style={{ color: 'var(--color-muted-light)' }}>MASUK</div>
+        <div className="text-lg font-black" style={{ color: 'var(--color-text)' }}>{formatRupiahShort(income)}</div>
+        <div className="text-[10px] font-bold mt-0.5" style={{ color: 'var(--color-success)' }}>{thisMonth.length} transaksi</div>
       </div>
-      <div className="clay-card bg-white/75 rounded-3xl p-4">
-        <div className="text-[10px] font-black text-[#9589c8] tracking-wide mb-1">KELUAR</div>
-        <div className="text-lg font-black text-[#3d2f8a]">{formatRupiahShort(outcome)}</div>
-        <div className="text-[10px] font-bold text-[#ef4444] mt-0.5">Transfer out</div>
+      <div className="clay-card bg-white rounded-3xl p-4">
+        <div className="text-[10px] font-black tracking-wide mb-1" style={{ color: 'var(--color-muted-light)' }}>KELUAR</div>
+        <div className="text-lg font-black" style={{ color: 'var(--color-text)' }}>{formatRupiahShort(outcome)}</div>
+        <div className="text-[10px] font-bold mt-0.5" style={{ color: 'var(--color-danger)' }}>Transfer out</div>
       </div>
     </div>
   )
@@ -62,7 +62,7 @@ function QABtn({ label, iconClass, icon, onClick }) {
       <div className={`w-14 h-14 rounded-[20px] flex items-center justify-center text-xl ${iconClass}`}>
         {icon}
       </div>
-      <span className="text-[11px] font-black text-[#6b5fb5]">{label}</span>
+      <span className="text-[11px] font-black" style={{ color: 'var(--color-muted)' }}>{label}</span>
     </div>
   )
 }
@@ -161,8 +161,8 @@ export default function DashboardPage() {
 
       {/* Greeting */}
       <div className="px-5 pb-4 font-nunito">
-        <p className="text-xs font-bold text-[#9589c8]">{getGreeting()},</p>
-        <h1 className="text-xl font-black text-[#3d2f8a]">{userName} 👋</h1>
+        <p className="text-xs font-bold" style={{ color: 'var(--color-muted-light)' }}>{getGreeting()},</p>
+        <h1 className="text-xl font-black" style={{ color: 'var(--color-text)' }}>{userName} 👋</h1>
       </div>
 
       {/* Low balance warning */}
@@ -190,7 +190,7 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="px-5 mb-2">
-        <p className="text-sm font-black text-[#3d2f8a] mb-3">Aksi Cepat</p>
+        <p className="text-sm font-black mb-3" style={{ color: 'var(--color-text)' }}>Aksi Cepat</p>
         <div className="grid grid-cols-4 gap-3">
           <QABtn
             label="Transfer"
@@ -223,7 +223,7 @@ export default function DashboardPage() {
       {transactions.length > 0 && (
         <>
           <div className="flex justify-between items-center px-5 mb-3 mt-5 font-nunito">
-            <span className="text-sm font-black text-[#3d2f8a]">Bulan Ini</span>
+            <span className="text-sm font-black" style={{ color: 'var(--color-text)' }}>Bulan Ini</span>
           </div>
           <StatsRow transactions={transactions} />
         </>
@@ -231,10 +231,11 @@ export default function DashboardPage() {
 
       {/* Recent transactions */}
       <div className="flex justify-between items-center px-5 mb-3 mt-2 font-nunito">
-        <span className="text-sm font-black text-[#3d2f8a]">Transaksi Terbaru</span>
+        <span className="text-sm font-black" style={{ color: 'var(--color-text)' }}>Transaksi Terbaru</span>
         <button
           onClick={() => { refetchWallet(); fetchTransactions(1) }}
-          className="text-[11px] font-black text-[#7c6af7] bg-transparent border-none cursor-pointer"
+          className="text-[11px] font-black bg-transparent border-none cursor-pointer"
+          style={{ color: 'var(--color-primary)' }}
         >
           ↻ Refresh
         </button>
@@ -253,7 +254,8 @@ export default function DashboardPage() {
         <NavItem icon="📋" label="history" active={activeTab} onChange={setActiveTab} />
         <div
           onClick={() => setShowTransfer(true)}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-[#7c6af7] to-[#5b3fdb] flex items-center justify-center text-white text-xl -mt-7 cursor-pointer clay-fab active:scale-95 transition-all duration-150"
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl -mt-7 cursor-pointer clay-fab active:scale-95 transition-all duration-150"
+          style={{ background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary))' }}
         >
           ⚡
         </div>

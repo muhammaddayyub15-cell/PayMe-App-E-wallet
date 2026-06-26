@@ -69,7 +69,7 @@ class LoginController extends Controller
             domain: null,
             secure: ! $isLocal,
             httpOnly: true,
-            raw: false,
+            raw: true,
             sameSite: $isLocal ? 'lax' : 'strict', // untuk production harus strict
         );
     }

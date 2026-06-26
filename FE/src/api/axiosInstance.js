@@ -15,19 +15,50 @@ axiosInstance.interceptors.request.use((config) => {
   return config
 })
 
+// Shared lock — mencegah beberapa request 401 yang terjadi bersamaan
+// (mis. saat dashboard mount dan beberapa hook fetch paralel) memicu
+// beberapa panggilan /api/refresh sekaligus, yang saling menghapus
+// access_token satu sama lain (lihat AuthService::refreshAccessToken).
+let refreshPromise = null
+
+function refreshAccessToken() {
+  if (!refreshPromise) {
+    refreshPromise = axiosInstance
+      .post('/refresh')
+      .finally(() => {
+        refreshPromise = null
+      })
+  }
+  return refreshPromise
+}
+
 // Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const status = error?.response?.status
+    const originalRequest = error.config
 
-    // 401 → clear auth state + redirect login
-    if (status === 401) {
-      // lazy import untuk hindari circular dependency
-      import('../stores/authStore').then(({ default: useAuthStore }) => {
+    // 401 → coba refresh access_token sekali sebelum redirect ke login.
+    // Endpoint /refresh dan /login sendiri dikecualikan supaya tidak infinite loop.
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/refresh') &&
+      !originalRequest.url?.includes('/login')
+    ) {
+      originalRequest._retry = true
+
+      try {
+        await refreshAccessToken() // semua request 401 paralel menunggu promise YANG SAMA
+        return axiosInstance(originalRequest) // ulangi request asli dengan access_token baru
+      } catch {
+        // refresh_token juga sudah invalid/expired → benar-benar logout
+        const { default: useAuthStore } = await import('../stores/authStore')
         useAuthStore.getState().clear()
-      })
-      window.location.href = '/login'
+        window.location.href = '/login'
+        return Promise.reject(error)
+      }
     }
 
     // 429 → tambah info retry ke error object

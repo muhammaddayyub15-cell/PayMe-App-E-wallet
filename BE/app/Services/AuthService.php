@@ -112,6 +112,31 @@ class AuthService
     }
 
     /**
+     * Terbitkan access_token baru menggunakan refresh_token yang masih valid.
+     * Dipanggil dari RefreshTokenController setelah refresh_token divalidasi
+     * via ability 'refresh'. Refresh_token LAMA tidak di-revoke — tetap
+     * hidup sampai TTL 7 hari aslinya atau sampai logout manual. Hanya
+     * access_token lama yang diganti agar tidak menumpuk di
+     * personal_access_tokens.
+     *
+     * @return array{access_token: string}
+     */
+    public function refreshAccessToken(User $user): array
+    {
+        $user->tokens()
+            ->where('name', 'access_token')
+            ->delete();
+
+        $accessToken = $user->createToken(
+            name: 'access_token',
+            abilities: ['access'],
+            expiresAt: now()->addMinutes(self::ACCESS_TOKEN_TTL_MINUTES),
+        )->plainTextToken;
+
+        return ['access_token' => $accessToken];
+    }
+
+    /**
      * Cek apakah akun sedang lockout (dipanggil dari CheckAccountLockout middleware).
      */
     public function isLockedOut(string $email): bool

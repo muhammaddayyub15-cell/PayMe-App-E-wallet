@@ -1,4 +1,3 @@
-// src/components/shared/BalanceCard.jsx
 import { useState } from 'react'
 import { formatRupiah } from '../../utils/formatCurrency'
 
@@ -6,7 +5,7 @@ export default function BalanceCard({ balance, holderName, onTopUp, onTransfer }
   const [hidden, setHidden] = useState(false)
 
   return (
-    <div className="mx-4 mb-5 bg-gradient-to-br from-[#8b78ff] via-[#7057f5] to-[#6347e8] rounded-[28px] p-6 relative clay-hero font-nunito">
+   <div className="mx-4 mb-5 bg-gradient-to-br from-[#8b78ff] via-[#7057f5] to-[#6347e8] rounded-[28px] p-6 clay-hero font-nunito">
 
       {/* Header row */}
       <div className="flex justify-between items-start mb-1">

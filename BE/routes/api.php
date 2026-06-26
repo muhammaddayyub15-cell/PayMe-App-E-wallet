@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\RefreshTokenController;
 use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\TransactionController;
@@ -25,6 +26,12 @@ Route::post('/register', RegisterController::class);
 
 Route::post('/login', LoginController::class)
     ->middleware(['lockout', 'throttle:5,1']);
+
+// Refresh access_token via refresh_token cookie — lihat RefreshTokenController.
+// Public route: validasi dilakukan manual di controller, bukan via auth:sanctum,
+// karena guard tersebut memvalidasi access_token, bukan refresh_token.
+Route::post('/refresh', RefreshTokenController::class)
+    ->middleware('throttle:10,1');
 
 // Webhook Tripay — validasi signature di controller, bukan via auth
 Route::post('/webhook/tripay', [WebhookController::class, 'handleTripay']);

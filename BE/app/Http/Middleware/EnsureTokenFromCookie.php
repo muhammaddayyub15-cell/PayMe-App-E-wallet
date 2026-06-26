@@ -21,11 +21,17 @@ class EnsureTokenFromCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->bearerToken() && $request->cookie('access_token')) {
-            $request->headers->set(
-                'Authorization',
-                'Bearer ' . $request->cookie('access_token')
-            );
+        $cookieValue = $request->cookie('access_token');
+
+        \Illuminate\Support\Facades\Log::debug('EnsureTokenFromCookie', [
+            'has_bearer'   => (bool) $request->bearerToken(),
+            'has_cookie'   => (bool) $cookieValue,
+            'cookie_value' => $cookieValue ? substr($cookieValue, 0, 20) . '...' : null,
+            'all_cookies'  => array_keys($request->cookies->all()),
+        ]);
+
+        if (! $request->bearerToken() && $cookieValue) {
+            $request->headers->set('Authorization', 'Bearer ' . $cookieValue);
         }
 
         return $next($request);
