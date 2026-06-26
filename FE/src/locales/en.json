@@ -1,0 +1,98 @@
+{
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "no_account": "Don't have an account?",
+      "register_link": "Register now"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Register and start using PayMe",
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "password": "Password",
+      "password_confirmation": "Confirm Password",
+      "password_helper": "Must contain uppercase, lowercase, number, and symbol.",
+      "submit": "Register Now",
+      "has_account": "Already have an account?",
+      "login_link": "Sign in here"
+    },
+    "logout": {
+      "title": "Sign out of PayMe?",
+      "body": "Your session will end. You need to sign in again to access your balance.",
+      "confirm": "Yes, Sign Out",
+      "cancel": "Cancel"
+    }
+  },
+  "dashboard": {
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "greeting_night": "Good night",
+    "balance_label": "Total Balance",
+    "hide_balance": "Hide",
+    "show_balance": "Show",
+    "quick_actions": "Quick Actions",
+    "transfer": "Transfer",
+    "topup": "Top Up",
+    "history": "History",
+    "logout": "Sign Out",
+    "this_month": "This Month",
+    "income": "INCOME",
+    "outcome": "OUTCOME",
+    "recent": "Recent Transactions",
+    "refresh": "Refresh",
+    "low_balance": "Your balance is almost empty. Minimum top-up Rp 10.000."
+  },
+  "topup": {
+    "title": "Top-Up Balance",
+    "subtitle": "Min. Rp 10.000 · Max. Rp 10.000.000",
+    "label": "Top-Up Amount",
+    "quick": "Quick Amount",
+    "preview": "You will top-up",
+    "submit": "Top Up",
+    "cancel": "Cancel",
+    "success": "Top-up successful!"
+  },
+  "transfer": {
+    "title": "Transfer Balance",
+    "subtitle": "Min. Rp 1.000 · Max. Rp 50.000.000",
+    "receiver": "Recipient (Email / Phone)",
+    "amount": "Transfer Amount",
+    "available": "Available Balance",
+    "after": "Balance after transfer",
+    "review": "Continue",
+    "cancel": "Cancel",
+    "confirm_title": "Confirm Transfer",
+    "confirm_receiver": "Recipient",
+    "confirm_amount": "Amount",
+    "confirm_after": "Balance after",
+    "confirm_warning": "Transaction cannot be cancelled after confirmation.",
+    "confirm_btn": "Yes, Transfer",
+    "success": "Transfer successful!"
+  },
+  "transaction": {
+    "filter_all": "All",
+    "filter_in": "Income",
+    "filter_out": "Outcome",
+    "filter_topup": "Top Up",
+    "empty_title": "No transactions",
+    "empty_body": "Start with a top-up or transfer.",
+    "empty_filter": "Try another filter.",
+    "load_more": "Load more",
+    "topup": "Top Up",
+    "transfer_in": "Income",
+    "transfer_out": "Outcome",
+    "adjustment": "Adjustment"
+  },
+  "error": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Connection error. Check your internet.",
+    "retry": "Retry"
+  }
+}

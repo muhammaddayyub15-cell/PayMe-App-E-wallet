@@ -1,0 +1,98 @@
+{
+  "auth": {
+    "login": {
+      "title": "Masuk",
+      "subtitle": "Masuk ke akun kamu",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Masuk",
+      "no_account": "Belum punya akun?",
+      "register_link": "Daftar sekarang"
+    },
+    "register": {
+      "title": "Buat Akun",
+      "subtitle": "Daftar dan mulai pakai PayMe",
+      "name": "Nama Lengkap",
+      "email": "Email",
+      "phone": "No. HP",
+      "password": "Password",
+      "password_confirmation": "Konfirmasi Password",
+      "password_helper": "Harus ada huruf besar, huruf kecil, angka, dan simbol.",
+      "submit": "Daftar Sekarang",
+      "has_account": "Sudah punya akun?",
+      "login_link": "Masuk di sini"
+    },
+    "logout": {
+      "title": "Keluar dari PayMe?",
+      "body": "Sesi kamu akan diakhiri. Kamu perlu login kembali untuk mengakses saldo.",
+      "confirm": "Ya, Keluar",
+      "cancel": "Batal"
+    }
+  },
+  "dashboard": {
+    "greeting_morning": "Selamat pagi",
+    "greeting_afternoon": "Selamat siang",
+    "greeting_evening": "Selamat sore",
+    "greeting_night": "Selamat malam",
+    "balance_label": "Total Saldo",
+    "hide_balance": "Sembunyikan",
+    "show_balance": "Tampilkan",
+    "quick_actions": "Aksi Cepat",
+    "transfer": "Transfer",
+    "topup": "Top-Up",
+    "history": "Riwayat",
+    "logout": "Keluar",
+    "this_month": "Bulan Ini",
+    "income": "MASUK",
+    "outcome": "KELUAR",
+    "recent": "Transaksi Terbaru",
+    "refresh": "Refresh",
+    "low_balance": "Saldo kamu hampir habis. Minimal top-up Rp 10.000."
+  },
+  "topup": {
+    "title": "Top-Up Saldo",
+    "subtitle": "Min. Rp 10.000 · Maks. Rp 10.000.000",
+    "label": "Nominal Top-Up",
+    "quick": "Nominal cepat",
+    "preview": "Kamu akan top-up",
+    "submit": "Top-Up",
+    "cancel": "Batal",
+    "success": "Top-up berhasil!"
+  },
+  "transfer": {
+    "title": "Transfer Saldo",
+    "subtitle": "Min. Rp 1.000 · Maks. Rp 50.000.000",
+    "receiver": "Penerima (Email / No. HP)",
+    "amount": "Nominal Transfer",
+    "available": "Saldo tersedia",
+    "after": "Saldo setelah transfer",
+    "review": "Lanjutkan",
+    "cancel": "Batal",
+    "confirm_title": "Konfirmasi Transfer",
+    "confirm_receiver": "Penerima",
+    "confirm_amount": "Nominal",
+    "confirm_after": "Saldo setelah",
+    "confirm_warning": "Transaksi tidak dapat dibatalkan setelah dikonfirmasi.",
+    "confirm_btn": "Ya, Transfer",
+    "success": "Transfer berhasil!"
+  },
+  "transaction": {
+    "filter_all": "Semua",
+    "filter_in": "Masuk",
+    "filter_out": "Keluar",
+    "filter_topup": "Top Up",
+    "empty_title": "Belum ada transaksi",
+    "empty_body": "Mulai dengan top-up atau transfer.",
+    "empty_filter": "Coba pilih filter lain.",
+    "load_more": "Muat lebih banyak",
+    "topup": "Top Up",
+    "transfer_in": "Transfer Masuk",
+    "transfer_out": "Transfer Keluar",
+    "adjustment": "Adjustment"
+  },
+  "error": {
+    "generic": "Terjadi kesalahan. Coba lagi.",
+    "network": "Koneksi bermasalah. Periksa internet kamu.",
+    "retry": "Coba lagi"
+  }
+}
