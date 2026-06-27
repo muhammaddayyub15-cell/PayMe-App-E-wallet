@@ -14,8 +14,9 @@ class TransactionResource extends JsonResource
             'type'          => $this->type,
             'amount'        => $this->amount,
             'balance_after' => $this->balance_after,
-            'counterparty'  => $this->resolveCounterparty(),
-            'created_at'    => $this->created_at->toISOString(),
+            'counterparty'             => $this->resolveCounterparty(),
+            'counterparty_identifier'  => $this->resolveCounterpartyIdentifier(),
+            'created_at'               => $this->created_at->toISOString(),
         ];
     }
 
@@ -23,6 +24,15 @@ class TransactionResource extends JsonResource
     {
         if (in_array($this->type, ['TRANSFER_OUT', 'TRANSFER_IN']) && $this->relatedWallet) {
             return $this->relatedWallet->user->name ?? null;
+        }
+
+        return null;
+    }
+
+    protected function resolveCounterpartyIdentifier(): ?string
+    {
+        if (in_array($this->type, ['TRANSFER_OUT', 'TRANSFER_IN']) && $this->relatedWallet) {
+            return $this->relatedWallet->user->email ?? null;
         }
 
         return null;

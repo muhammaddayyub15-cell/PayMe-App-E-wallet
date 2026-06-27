@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 
@@ -8,20 +8,17 @@ import Toast from '../../components/ui/Toast'
 import Modal from '../../components/ui/Modal'
 import useTransactions from '../../hooks/useTransactions'
 
-const FILTERS = [
-  { key: 'all',          label: 'Semua' },
-  { key: 'TRANSFER_IN',  label: 'Masuk' },
-  { key: 'TRANSFER_OUT', label: 'Keluar' },
-  { key: 'TOPUP',        label: 'Top Up' },
-]
+
 
 export default function HistoryPage() {
   const navigate = useNavigate()
   const [logoutModal, setLogoutModal] = useState(false)
   const [logoutLoading, setLogoutLoading] = useState(false)
-  const [activeFilter, setActiveFilter] = useState('all')
 
   const { transactions, meta, isLoading, fetchTransactions, loadMore } = useTransactions()
+
+  useEffect(() => { fetchTransactions(1) }, [fetchTransactions])
+
 
   const handleLogout = async () => {
     setLogoutLoading(true)
@@ -29,11 +26,6 @@ export default function HistoryPage() {
     navigate('/login')
     setLogoutLoading(false)
   }
-
-  const filtered = useMemo(() => {
-    if (activeFilter === 'all') return transactions
-    return transactions.filter(t => t.type === activeFilter)
-  }, [transactions, activeFilter])
 
   return (
     <div className="flex min-h-screen font-nunito" style={{ background: 'var(--clay-bg)' }}>
@@ -62,27 +54,10 @@ export default function HistoryPage() {
           <div className="rounded-3xl p-4 md:p-5 flex flex-col gap-4"
             style={{ background: 'var(--clay-surface)', boxShadow: 'var(--clay-shadow)' }}>
 
-            {/* Filter tabs — scroll horizontal di mobile */}
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-              {FILTERS.map(f => (
-                <button
-                  key={f.key}
-                  onClick={() => setActiveFilter(f.key)}
-                  className="px-4 py-2 rounded-full text-xs font-bold border-none cursor-pointer whitespace-nowrap flex-shrink-0 transition-colors duration-150"
-                  style={{
-                    background: activeFilter === f.key ? 'var(--clay-primary)' : 'rgba(91,63,219,0.08)',
-                    color: activeFilter === f.key ? 'white' : 'var(--clay-primary)',
-                  }}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
             <TransactionList
-              transactions={filtered}
+              transactions={transactions}
               isLoading={isLoading}
-              meta={activeFilter === 'all' ? meta : null}
+              meta={meta}
               onLoadMore={loadMore}
             />
           </div>

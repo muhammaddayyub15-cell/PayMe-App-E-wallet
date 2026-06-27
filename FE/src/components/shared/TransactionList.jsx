@@ -29,15 +29,14 @@ export default function TransactionList({ transactions, isLoading, meta, onLoadM
             <button
               key={f.label}
               onClick={() => setFilter(f.value)}
-              className={`
-                px-3.5 py-1.5 rounded-full text-[11px] font-black
-                border-none cursor-pointer whitespace-nowrap
-                transition-all duration-150 active:scale-95
-                ${active
-                  ? 'bg-gradient-to-br from-[#a898ff] to-[#7c6af7] text-white clay-chip-active'
-                  : 'bg-white/75 text-[#6b5fb5] clay-chip-inactive'
-                }
-              `}
+              className="px-3.5 py-1.5 rounded-full text-[11px] font-black border-none cursor-pointer whitespace-nowrap transition-all duration-150 active:scale-95 hover:-translate-y-0.5"
+              style={{
+                background: active ? 'linear-gradient(135deg,#a898ff,#7c6af7)' : 'rgba(255,255,255,0.75)',
+                color: active ? 'white' : '#6b5fb5',
+                boxShadow: active
+                  ? '4px 6px 16px rgba(91,63,219,0.35),-2px -2px 6px rgba(255,255,255,0.5),inset 2px 2px 5px #c0b0ff,inset -2px -2px 5px #5a3fcc'
+                  : '3px 4px 10px rgba(91,63,219,0.10),-1px -1px 4px rgba(255,255,255,0.9),inset 1px 1px 4px rgba(255,255,255,0.8)',
+              }}
             >
               {f.label}
             </button>

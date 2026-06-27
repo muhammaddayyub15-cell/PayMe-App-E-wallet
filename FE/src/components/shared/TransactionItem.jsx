@@ -43,7 +43,8 @@ export default function TransactionItem({ tx }) {
     <div className="flex items-center gap-3 bg-white/75 px-4 py-3.5 rounded-[22px] clay-card font-nunito">
 
       {/* Icon */}
-      <div className={`w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center ${ic.bg} ${ic.clay}`}>
+      <div className={`w-11 h-11 rounded-2xl flex-shrink-0 flex items-center justify-center ${ic.bg}`}
+        style={{ boxShadow: '4px 6px 14px rgba(0,0,0,0.10),-2px -2px 6px rgba(255,255,255,0.8),inset 2px 2px 5px rgba(255,255,255,0.5),inset -2px -2px 5px rgba(0,0,0,0.06)' }}>
         <span className={`text-base font-black ${ic.color}`}>{ic.symbol}</span>
       </div>
 

@@ -17,6 +17,8 @@ import QuickTransferBar from '../../components/shared/QuickTransferBar'
 import InsightCards from '../../components/shared/InsightCards'
 import ActivityHeatmap from '../../components/shared/ActivityHeatmap'
 import QrProfileCard from '../../components/shared/QrProfileCard'
+import TodayTimeline from '../../components/shared/TodayTimeline'
+import TopReceivers from '../../components/shared/TopReceivers'
 import Modal from '../../components/ui/Modal'
 import Toast from '../../components/ui/Toast'
 import Spinner from '../../components/ui/Spinner'
@@ -94,24 +96,25 @@ function StatCard({ label, value, sub, color }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
-  const navigate  = useNavigate()
-  const user      = useAuthStore(s => s.user)
+  const navigate = useNavigate()
+  const user = useAuthStore(s => s.user)
   const clearAuth = useAuthStore(s => s.clear)
 
   const { balance, isLoading: walletLoading, refetch: refetchWallet } = useWallet()
   const { transactions, meta, isLoading: txLoading, fetchTransactions, loadMore } = useTransactions()
 
-  const [showTopUp,      setShowTopUp]      = useState(false)
-  const [showTransfer,   setShowTransfer]   = useState(false)
+  const [showNotif, setShowNotif] = useState(false)
+  const [showTopUp, setShowTopUp] = useState(false)
+  const [showTransfer, setShowTransfer] = useState(false)
   const [transferTarget, setTransferTarget] = useState('')
-  const [logoutModal,    setLogoutModal]    = useState(false)
-  const [logoutLoading,  setLogoutLoading]  = useState(false)
+  const [logoutModal, setLogoutModal] = useState(false)
+  const [logoutLoading, setLogoutLoading] = useState(false)
 
   useEffect(() => { fetchTransactions(1) }, [fetchTransactions])
 
   const handleLogout = async () => {
     setLogoutLoading(true)
-    try { const { logout } = await import('../../api/authApi'); await logout() } catch {}
+    try { const { logout } = await import('../../api/authApi'); await logout() } catch { }
     clearAuth(); navigate('/login'); setLogoutLoading(false)
   }
 
@@ -125,14 +128,14 @@ export default function DashboardPage() {
     const d = new Date(tx.created_at)
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
   })
-  const totalIn    = thisMonth.filter(t => t.type === 'TRANSFER_IN' || t.type === 'TOPUP').reduce((s, t) => s + t.amount, 0)
-  const totalOut   = thisMonth.filter(t => t.type === 'TRANSFER_OUT').reduce((s, t) => s + t.amount, 0)
+  const totalIn = thisMonth.filter(t => t.type === 'TRANSFER_IN' || t.type === 'TOPUP').reduce((s, t) => s + t.amount, 0)
+  const totalOut = thisMonth.filter(t => t.type === 'TRANSFER_OUT').reduce((s, t) => s + t.amount, 0)
   const totalCount = thisMonth.length
 
-  const isSuspended    = user?.is_suspended
-  const has2FA         = user?.two_factor_confirmed_at
+  const isSuspended = user?.is_suspended
+  const has2FA = user?.two_factor_confirmed_at
   const isEmptyBalance = balance === 0
-  const lowBalance     = balance !== null && balance > 0 && balance < 10000
+  const lowBalance = balance !== null && balance > 0 && balance < 10000
 
   return (
     <div className="flex min-h-screen font-nunito" style={{ background: 'var(--clay-bg)' }}>
@@ -176,15 +179,48 @@ export default function DashboardPage() {
               >
                 <RefreshCw size={16} color="var(--clay-primary)" strokeWidth={2.5} />
               </button>
-              <button
-                className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center border-none cursor-pointer relative flex-shrink-0"
-                style={{ background: 'var(--clay-surface)', boxShadow: 'var(--clay-shadow-sm)' }}
-              >
-                <Bell size={16} color="var(--clay-primary)" strokeWidth={2.5} />
-                {totalCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: 'var(--clay-pink)' }} />
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotif(v => !v)}
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center border-none cursor-pointer relative flex-shrink-0"
+                  style={{ background: 'var(--clay-surface)', boxShadow: 'var(--clay-shadow-sm)' }}
+                >
+                  <Bell size={16} color="var(--clay-primary)" strokeWidth={2.5} />
+                  {totalCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: 'var(--clay-pink)' }} />
+                  )}
+                </button>
+
+                {showNotif && (
+                  <div className="absolute right-0 top-12 w-72 rounded-3xl p-4 z-50 flex flex-col gap-2"
+                    style={{ background: 'var(--clay-surface)', boxShadow: 'var(--clay-shadow)' }}>
+                    <p className="text-xs font-black" style={{ color: 'var(--clay-text)' }}>Transaksi Hari Ini</p>
+                    {transactions
+                      .filter(tx => new Date(tx.created_at).toDateString() === new Date().toDateString())
+                      .slice(0, 5)
+                      .map(tx => (
+                        <div key={tx.id} className="flex items-center gap-2 px-3 py-2 rounded-2xl"
+                          style={{ background: 'rgba(91,63,219,0.05)' }}>
+                          <span className="text-sm">{tx.type === 'TOPUP' ? '⬆' : tx.type === 'TRANSFER_IN' ? '↙' : '↗'}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-black truncate" style={{ color: 'var(--clay-text)' }}>
+                              {tx.counterparty ?? 'Top-Up Saldo'}
+                            </p>
+                            <p className="text-[10px]" style={{ color: 'var(--clay-muted-lt)' }}>
+                              {new Date(tx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                          <p className="text-[11px] font-black" style={{ color: tx.type === 'TRANSFER_OUT' ? 'var(--clay-danger)' : 'var(--clay-teal)' }}>
+                            {tx.type === 'TRANSFER_OUT' ? '-' : '+'}{Math.round(tx.amount / 1000)}rb
+                          </p>
+                        </div>
+                      ))}
+                    {!transactions.filter(tx => new Date(tx.created_at).toDateString() === new Date().toDateString()).length && (
+                      <p className="text-xs font-semibold text-center py-2" style={{ color: 'var(--clay-muted-lt)' }}>Belum ada transaksi hari ini</p>
+                    )}
+                  </div>
                 )}
-              </button>
+              </div>
             </div>
           </div>
 
@@ -238,6 +274,9 @@ export default function DashboardPage() {
               {/* Spending chart */}
               <SpendingChart transactions={transactions} />
 
+              {/* Top receivers */}
+              <TopReceivers transactions={transactions} onTransfer={handleQuickTransfer} />
+
             </div>
 
             {/* COL 2 */}
@@ -251,6 +290,9 @@ export default function DashboardPage() {
 
               {/* Activity heatmap */}
               <ActivityHeatmap transactions={transactions} />
+
+              {/* Today timeline */}
+              <TodayTimeline transactions={transactions} />
 
             </div>
 
@@ -291,11 +333,11 @@ export default function DashboardPage() {
         </p>
       </Modal>
 
-      <Modal isOpen={showTopUp} onClose={() => setShowTopUp(false)} onConfirm={() => {}} title="" confirmLabel="">
+      <Modal isOpen={showTopUp} onClose={() => setShowTopUp(false)} onConfirm={() => { }} title="" confirmLabel="">
         <TopUpForm onSuccess={handleTopUpSuccess} onCancel={() => setShowTopUp(false)} />
       </Modal>
 
-      <Modal isOpen={showTransfer} onClose={() => setShowTransfer(false)} onConfirm={() => {}} title="" confirmLabel="">
+      <Modal isOpen={showTransfer} onClose={() => setShowTransfer(false)} onConfirm={() => { }} title="" confirmLabel="">
         <TransferForm onSuccess={handleTransferSuccess} onCancel={() => setShowTransfer(false)} defaultReceiver={transferTarget} />
       </Modal>
 

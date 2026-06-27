@@ -80,8 +80,11 @@ export default function OtpModal({ onVerified, onClose }) {
                 <button
                     onClick={handleVerify}
                     disabled={loading || code.length !== 6}
-                    className="mt-4 w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold
-                               text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                    className="mt-4 w-full py-3 rounded-full text-sm font-black text-white border-none cursor-pointer transition-all duration-150 hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                        background: '#5b3fdb',
+                        boxShadow: '6px 8px 20px rgba(91,63,219,0.35),-3px -3px 10px rgba(255,255,255,0.5),inset 3px 3px 8px #a090ff,inset -3px -3px 8px #3a22b8',
+                    }}
                 >
                     {loading ? "Memverifikasi..." : "Verifikasi"}
                 </button>

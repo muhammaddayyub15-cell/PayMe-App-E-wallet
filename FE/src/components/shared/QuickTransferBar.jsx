@@ -15,7 +15,7 @@ export default function QuickTransferBar({ transactions = [], onTransfer }) {
       .filter(tx => tx.type === 'TRANSFER_OUT' && tx.counterparty)
       .filter(tx => { if (seen.has(tx.counterparty)) return false; seen.add(tx.counterparty); return true })
       .slice(0, 4)
-      .map(tx => ({ name: tx.counterparty, initials: tx.counterparty.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() }))
+      .map(tx => ({ name: tx.counterparty, identifier: tx.counterparty_identifier, initials: tx.counterparty.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() }))
   }, [transactions])
 
   if (!recents.length) return null
@@ -27,12 +27,12 @@ export default function QuickTransferBar({ transactions = [], onTransfer }) {
         {recents.map((r, i) => (
           <button
             key={r.name}
-            onClick={() => onTransfer(r.name)}
+            onClick={() => onTransfer(r.identifier ?? r.name)}
             className="flex flex-col items-center gap-2 border-none bg-transparent cursor-pointer group"
           >
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-black text-white transition-transform group-hover:scale-105"
-              style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length], boxShadow: 'var(--clay-shadow-sm)' }}
+                            style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length], boxShadow: '4px 6px 16px rgba(80,48,192,0.35), -2px -2px 8px rgba(255,255,255,0.5), inset 2px 2px 6px rgba(255,255,255,0.25), inset -2px -2px 6px rgba(40,20,120,0.3)' }}
             >
               {r.initials}
             </div>
@@ -45,7 +45,8 @@ export default function QuickTransferBar({ transactions = [], onTransfer }) {
         >
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-105"
-            style={{ background: 'rgba(91,63,219,0.08)', boxShadow: 'var(--clay-shadow-sm)' }}
+                        style={{ background: 'rgba(91,63,219,0.08)', boxShadow: '4px 6px 16px rgba(91,63,219,0.15), -2px -2px 8px rgba(255,255,255,0.8), inset 2px 2px 6px rgba(255,255,255,0.9), inset -2px -2px 6px rgba(180,170,230,0.3)' }}
+
           >
             <Plus size={20} color="var(--clay-primary)" strokeWidth={2.5} />
           </div>

@@ -12,8 +12,8 @@ import { generateIdempotencyKey } from '../../utils/idempotency'
 import { validateTransferAmount, validateReceiver, validateSufficient } from '../../utils/validators'
 
 
-export default function TransferForm({ onSuccess, onCancel }) {
-  const [form, setForm] = useState({ receiver_identifier: '', amount: '' })
+export default function TransferForm({ onSuccess, onCancel, defaultReceiver = '' }) {
+  const [form, setForm] = useState({ receiver_identifier: defaultReceiver, amount: '' })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)

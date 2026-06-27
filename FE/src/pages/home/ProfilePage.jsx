@@ -12,7 +12,7 @@ function InfoRow({ icon: Icon, label, value }) {
   return (
     <div className="flex items-center gap-3 py-3 border-b last:border-b-0" style={{ borderColor: 'var(--clay-border)' }}>
       <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: 'rgba(91,63,219,0.08)' }}>
+        style={{ background: 'rgba(91,63,219,0.08)', boxShadow: '3px 4px 10px rgba(91,63,219,0.12),-1px -1px 4px rgba(255,255,255,0.9),inset 1px 1px 4px rgba(255,255,255,0.8)' }}>
         <Icon size={16} color="var(--clay-primary)" strokeWidth={2.5} />
       </div>
       <div className="min-w-0">
@@ -51,8 +51,8 @@ export default function ProfilePage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer flex-shrink-0"
-              style={{ background: 'var(--clay-surface)', boxShadow: 'var(--clay-shadow-sm)' }}
+              className="w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer flex-shrink-0 transition-all duration-150 hover:-translate-y-0.5 active:scale-95"
+              style={{ background: 'var(--clay-surface)', boxShadow: '4px 6px 16px rgba(91,63,219,0.15),-2px -2px 8px rgba(255,255,255,0.8),inset 2px 2px 6px rgba(255,255,255,0.9),inset -2px -2px 6px rgba(180,170,230,0.3)' }}
             >
               <ArrowLeft size={16} color="var(--clay-primary)" strokeWidth={2.5} />
             </button>
@@ -63,7 +63,7 @@ export default function ProfilePage() {
           <div className="rounded-3xl p-6 flex flex-col items-center gap-3"
             style={{ background: 'var(--clay-surface)', boxShadow: 'var(--clay-shadow)' }}>
             <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black text-white"
-              style={{ background: 'linear-gradient(135deg, #f9a8d4, #f472b6)' }}>
+              style={{ background: 'linear-gradient(135deg, #f9a8d4, #f472b6)', boxShadow: '6px 8px 20px rgba(244,114,182,0.35),-3px -3px 10px rgba(255,255,255,0.5),inset 3px 3px 8px rgba(255,255,255,0.3),inset -3px -3px 8px rgba(200,50,130,0.3)' }}>
               {initials}
             </div>
             <div className="text-center">
