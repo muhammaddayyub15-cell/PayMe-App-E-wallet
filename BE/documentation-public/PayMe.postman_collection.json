@@ -1,672 +1,186 @@
 {
-  "info": {
-    "name": "PayMe E-Wallet API",
-    "description": "Collection lengkap untuk testing PayMe E-Wallet — Phase 1, 2, 3",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8000/api",
-      "type": "string"
-    }
-  ],
+  "name": "2FA — TOTP",
   "item": [
     {
-      "name": "Auth",
-      "item": [
-        {
-          "name": "Register — Sukses",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi@example.com\",\n  \"phone\": \"081234567890\",\n  \"password\": \"Passw0rd!23\",\n  \"password_confirmation\": \"Passw0rd!23\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Register — Email Invalid",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"user@\",\n  \"phone\": \"081234567891\",\n  \"password\": \"Passw0rd!23\",\n  \"password_confirmation\": \"Passw0rd!23\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Register — Password < 8 Karakter",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi2@example.com\",\n  \"phone\": \"081234567892\",\n  \"password\": \"Pass1!\",\n  \"password_confirmation\": \"Pass1!\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Register — Password Tanpa Kompleksitas",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi3@example.com\",\n  \"phone\": \"081234567893\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Register — Email Sudah Dipakai",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Budi Lain\",\n  \"email\": \"budi@example.com\",\n  \"phone\": \"081234567894\",\n  \"password\": \"Passw0rd!23\",\n  \"password_confirmation\": \"Passw0rd!23\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login — Sukses",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"budi@example.com\",\n  \"password\": \"Passw0rd!23\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login — Kredensial Salah",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"budi@example.com\",\n  \"password\": \"WrongPass!\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login — Admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@payme.id\",\n  \"password\": \"Passw0rd!23\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"] },
-            "body": { "mode": "raw", "raw": "{}" }
-          }
-        }
-      ]
+      "name": "2FA Setup — Generate QR",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/2fa/setup", "host": ["{{base_url}}"], "path": ["2fa", "setup"] },
+        "body": { "mode": "raw", "raw": "{}" }
+      }
     },
     {
-      "name": "Wallet",
-      "item": [
-        {
-          "name": "GET Saldo",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/wallet", "host": ["{{base_url}}"], "path": ["wallet"] }
-          }
+      "name": "2FA Confirm — Aktifkan 2FA",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/2fa/confirm", "host": ["{{base_url}}"], "path": ["2fa", "confirm"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"123456\"\n}"
         }
-      ]
+      }
     },
     {
-      "name": "Top-Up",
-      "item": [
-        {
-          "name": "Top-Up — Sukses",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 100000\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Input Kosong",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Input Huruf",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"abc\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Input Simbol",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": \"@#$\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Negatif",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": -5000\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Desimal",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 10000.5\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Di Bawah Minimum",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 5000\n}"
-            }
-          }
-        },
-        {
-          "name": "Top-Up — Melebihi Maksimum",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup", "host": ["{{base_url}}"], "path": ["topup"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 99999999\n}"
-            }
-          }
+      "name": "2FA Verify Login — Step 2 Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/2fa/verify-totp", "host": ["{{base_url}}"], "path": ["2fa", "verify-totp"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"123456\"\n}"
         }
-      ]
+      }
     },
     {
-      "name": "Transfer",
-      "item": [
-        {
-          "name": "Transfer — Sukses via Email",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-001" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 25000\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — Sukses via No HP",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-002" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"089876543210\",\n  \"amount\": 25000\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — Saldo Tidak Cukup",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-003" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 999999999\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — Penerima Tidak Ditemukan",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-004" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"tidakada@example.com\",\n  \"amount\": 25000\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — ke Diri Sendiri",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-005" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"budi@example.com\",\n  \"amount\": 25000\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — Idempotency (Double Submit)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-001" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 25000\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — Amount Di Bawah Minimum",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-006" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 500\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer — Amount Melebihi Maksimum",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Idempotency-Key", "value": "uuid-test-007" }
-            ],
-            "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 999999999\n}"
-            }
-          }
+      "name": "2FA Verify Login — Kode Salah (422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/2fa/verify-totp", "host": ["{{base_url}}"], "path": ["2fa", "verify-totp"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"000000\"\n}"
         }
-      ]
+      }
     },
     {
-      "name": "Transaction History",
-      "item": [
-        {
-          "name": "GET Riwayat Transaksi — Page 1",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/transactions?page=1",
-              "host": ["{{base_url}}"],
-              "path": ["transactions"],
-              "query": [{ "key": "page", "value": "1" }]
-            }
-          }
-        },
-        {
-          "name": "GET Riwayat Transaksi — Page 2",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/transactions?page=2",
-              "host": ["{{base_url}}"],
-              "path": ["transactions"],
-              "query": [{ "key": "page", "value": "2" }]
-            }
-          }
-        },
-        {
-          "name": "GET Riwayat — Tanpa Auth (401)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/transactions",
-              "host": ["{{base_url}}"],
-              "path": ["transactions"]
-            }
-          }
+      "name": "2FA Disable — Matikan 2FA",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/2fa/disable", "host": ["{{base_url}}"], "path": ["2fa", "disable"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"password\": \"Passw0rd!23\"\n}"
         }
-      ]
+      }
     },
     {
-      "name": "Admin",
-      "item": [
-        {
-          "name": "GET Semua User",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/admin/users", "host": ["{{base_url}}"], "path": ["admin", "users"] }
-          }
-        },
-        {
-          "name": "Suspend User",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/admin/users/2/suspend", "host": ["{{base_url}}"], "path": ["admin", "users", "2", "suspend"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"is_suspended\": true\n}"
-            }
-          }
-        },
-        {
-          "name": "Aktifkan User (Unsuspend)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/admin/users/2/suspend", "host": ["{{base_url}}"], "path": ["admin", "users", "2", "suspend"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"is_suspended\": false\n}"
-            }
-          }
-        },
-        {
-          "name": "GET Semua Transaksi",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/admin/transactions?page=1",
-              "host": ["{{base_url}}"],
-              "path": ["admin", "transactions"],
-              "query": [{ "key": "page", "value": "1" }]
-            }
-          }
-        },
-        {
-          "name": "Admin — Akses Non-Admin (403)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/admin/users", "host": ["{{base_url}}"], "path": ["admin", "users"] }
-          }
+      "name": "2FA Disable — Password Salah (422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/2fa/disable", "host": ["{{base_url}}"], "path": ["2fa", "disable"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"password\": \"WrongPass!\"\n}"
         }
-      ]
+      }
+    }
+  ]
+},
+{
+  "name": "OTP — Transfer",
+  "item": [
+    {
+      "name": "OTP Send — Kirim Kode ke Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/otp/send", "host": ["{{base_url}}"], "path": ["otp", "send"] },
+        "body": { "mode": "raw", "raw": "{}" }
+      }
     },
     {
-      "name": "Phase 2 — QRIS Top-Up",
-      "item": [
-        {
-          "name": "Create QRIS Charge",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/topup/create-charge", "host": ["{{base_url}}"], "path": ["topup", "create-charge"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 50000\n}"
-            }
-          }
-        },
-        {
-          "name": "Webhook Tripay — PAID",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Callback-Signature", "value": "test-signature-here" }
-            ],
-            "url": { "raw": "{{base_url}}/webhook/tripay", "host": ["{{base_url}}"], "path": ["webhook", "tripay"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"merchant_ref\": \"PAY-XXXXXXXXXX\",\n  \"reference\": \"TRIPAY-REF-001\",\n  \"status\": \"PAID\",\n  \"amount\": 50000\n}"
-            }
-          }
-        },
-        {
-          "name": "Webhook Tripay — Signature Invalid (403)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" },
-              { "key": "X-Callback-Signature", "value": "invalid-signature" }
-            ],
-            "url": { "raw": "{{base_url}}/webhook/tripay", "host": ["{{base_url}}"], "path": ["webhook", "tripay"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"merchant_ref\": \"PAY-XXXXXXXXXX\",\n  \"status\": \"PAID\",\n  \"amount\": 50000\n}"
-            }
-          }
+      "name": "OTP Verify — Kode Valid",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/otp/verify", "host": ["{{base_url}}"], "path": ["otp", "verify"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"123456\"\n}"
         }
-      ]
+      }
     },
     {
-      "name": "Phase 3 — Multilang",
-      "item": [
-        {
-          "name": "GET Bundle English",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": { "raw": "{{base_url}}/languages/en", "host": ["{{base_url}}"], "path": ["languages", "en"] }
-          }
-        },
-        {
-          "name": "GET Bundle Indonesia",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": { "raw": "{{base_url}}/languages/id", "host": ["{{base_url}}"], "path": ["languages", "id"] }
-          }
-        },
-        {
-          "name": "GET Bundle Locale Tidak Valid (404)",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": { "raw": "{{base_url}}/languages/jp", "host": ["{{base_url}}"], "path": ["languages", "jp"] }
-          }
-        },
-        {
-          "name": "Admin — GET Semua Language Bundle",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": { "raw": "{{base_url}}/admin/languages", "host": ["{{base_url}}"], "path": ["admin", "languages"] }
-          }
-        },
-        {
-          "name": "Admin — Tambah Key",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/admin/languages", "host": ["{{base_url}}"], "path": ["admin", "languages"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"locale\": \"id\",\n  \"key\": \"auth.login.title\",\n  \"value\": \"Masuk ke Akun\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Admin — Update Key",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": { "raw": "{{base_url}}/admin/languages/1", "host": ["{{base_url}}"], "path": ["admin", "languages", "1"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"value\": \"Login ke Akun Kamu\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Admin — Hapus Key",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": { "raw": "{{base_url}}/admin/languages/1", "host": ["{{base_url}}"], "path": ["admin", "languages", "1"] }
-          }
+      "name": "OTP Verify — Kode Salah (422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/otp/verify", "host": ["{{base_url}}"], "path": ["otp", "verify"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"000000\"\n}"
         }
-      ]
+      }
+    },
+    {
+      "name": "OTP Verify — Kode Expired (422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{base_url}}/otp/verify", "host": ["{{base_url}}"], "path": ["otp", "verify"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"123456\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Transfer — Tanpa OTP (403 otp_required)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Idempotency-Key", "value": "uuid-otp-test-001" }
+        ],
+        "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 25000\n}"
+        }
+      }
+    },
+    {
+      "name": "Transfer — Setelah OTP Verified (Grace Period)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-Idempotency-Key", "value": "uuid-otp-test-002" }
+        ],
+        "url": { "raw": "{{base_url}}/transfer", "host": ["{{base_url}}"], "path": ["transfer"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"receiver_identifier\": \"ani@example.com\",\n  \"amount\": 25000\n}"
+        }
+      }
     }
   ]
 }

@@ -17,7 +17,7 @@ class CheckAccountLockout
      * Cek Redis/Cache: failed_attempts:{email} >= 5 → 429.
      * Lihat 02-system-structure.md §4.2.
      */
-    public function handle(Request $request, Closure $next): Response
+   public function handle(Request $request, Closure $next): Response
     {
         $email = $request->input('email');
 
@@ -26,6 +26,16 @@ class CheckAccountLockout
                 'success' => false,
                 'message' => 'Akun terkunci, coba lagi dalam 15 menit.',
             ], 429);
+        }
+
+        // Suspension check — cek setelah lockout agar lockout tetap prioritas utama
+        $user = $email ? \App\Models\User::where('email', $email)->first() : null;
+
+        if ($user?->is_suspended) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda telah disuspend.',
+            ], 403);
         }
 
         return $next($request);

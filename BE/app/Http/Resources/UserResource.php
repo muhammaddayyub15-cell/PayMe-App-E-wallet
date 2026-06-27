@@ -19,6 +19,8 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'role' => $this->role,
+            'is_suspended' => $this->is_suspended,
+            'two_factor_confirmed_at' => $this->two_factor_confirmed_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

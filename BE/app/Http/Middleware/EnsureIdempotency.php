@@ -7,14 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Cek header X-Idempotency-Key sebelum request diteruskan ke Controller.
- * Lihat 02-system-structure.md §7.
- *
- * Key disimpan di Redis dengan TTL 24 jam (Decision Log #003). Kalau key
- * yang sama sudah pernah diproses, langsung return response tersimpan
- * TANPA menjalankan ulang TransferService.
- */
 class EnsureIdempotency
 {
     private const TTL_HOURS = 24;
@@ -31,25 +23,29 @@ class EnsureIdempotency
         }
 
         $cacheKey = "idempotency:{$key}";
-        $cached = Cache::get($cacheKey);
 
-        if ($cached !== null) {
-            return response()->json(
-                $cached['body'],
-                $cached['status'],
-            );
+        try {
+            $cached = Cache::get($cacheKey);
+        } catch (\Exception $e) {
+            report($e);
+            return $next($request);
         }
 
-        /** @var Response $response */
+        if ($cached !== null) {
+            return response()->json($cached['body'], $cached['status']);
+        }
+
         $response = $next($request);
 
-        // Hanya simpan response sukses (2xx) — error tidak perlu di-replay,
-        // supaya user bisa retry dengan key baru kalau memang gagal validasi.
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-            Cache::put($cacheKey, [
-                'body' => json_decode($response->getContent(), true),
-                'status' => $response->getStatusCode(),
-            ], now()->addHours(self::TTL_HOURS));
+            try {
+                Cache::put($cacheKey, [
+                    'body'   => json_decode($response->getContent(), true),
+                    'status' => $response->getStatusCode(),
+                ], now()->addHours(self::TTL_HOURS));
+            } catch (\Exception $e) {
+                report($e);
+            }
         }
 
         return $response;

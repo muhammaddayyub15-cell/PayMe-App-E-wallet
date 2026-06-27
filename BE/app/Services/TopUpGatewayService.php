@@ -46,61 +46,60 @@ class TopUpGatewayService
 
     // ── Handle Webhook (Step 2 — dipanggil dari WebhookController) ───────────
 
-    public function handleWebhook(array $payload): void
-    {
-        $merchantRef = $payload['merchant_ref'];
-        $status      = $payload['status']; // PAID | UNPAID | FAILED | REFUND
+   public function handleWebhook(array $payload): void
+{
+    $merchantRef = $payload['merchant_ref'];
+    $status      = $payload['status'];
 
-        if ($status !== 'PAID') {
-            return;
-        }
-
-        $cached = Cache::get('topup_charge:' . $merchantRef);
-
-        if (!$cached) {
-            throw new \RuntimeException('Charge tidak ditemukan atau sudah diproses.');
-        }
-
-        // Cegah double processing via Redis lock
-        $lockKey = 'topup_processing:' . $merchantRef;
-
-        if (Cache::has($lockKey)) {
-            return;
-        }
-
-        Cache::put($lockKey, true, 300);
-
-        DB::transaction(function () use ($cached) {
-            $wallet = $this->walletRepository->lockForUpdate($cached['user_id']);
-
-            $this->walletRepository->credit($wallet->id, $cached['amount']);
-
-            $transaction = $this->transactionRepository->create([
-                'wallet_id'    => $wallet->id,
-                'type'         => 'TOPUP',
-                'amount'       => $cached['amount'],
-                'balance_after'=> $wallet->fresh()->balance,
-            ]);
-
-            $this->auditLogService->log('TOPUP', [
-                'amount'       => $cached['amount'],
-                'transaction_id' => $transaction->id,
-                'source'       => 'tripay_qris',
-            ]);
-        });
-
-        $user = \App\Models\User::find($cached['user_id']);
-
-        $this->notificationService->dispatch(
-            new TopUpSuccessMail(
-                recipientName: $user->name,
-                amount:        $cached['amount'],
-                balanceAfter:  $user->wallet->fresh()->balance,
-                transactedAt:  now()->toDateTimeString(),
-            ),
-            $user,
-        );
-
-        Cache::forget('topup_charge:' . $cached['merchant_ref']);
+    if ($status !== 'PAID') {
+        return;
     }
+
+    $cached = Cache::get('topup_charge:' . $merchantRef);
+
+    if (!$cached) {
+        throw new \RuntimeException('Charge tidak ditemukan atau sudah diproses.');
+    }
+
+    $lockKey = 'topup_processing:' . $merchantRef;
+
+    if (Cache::has($lockKey)) {
+        return;
+    }
+
+    Cache::put($lockKey, true, 300);
+
+    DB::transaction(function () use ($cached) {
+        $wallet = $this->walletRepository->findByUserId($cached['user_id']);
+        $wallet = $this->walletRepository->lockForUpdate($wallet->id);
+        $wallet = $this->walletRepository->credit($wallet, $cached['amount']);
+
+        $transaction = $this->transactionRepository->create([
+            'wallet_id'     => $wallet->id,
+            'type'          => 'TOPUP',
+            'amount'        => $cached['amount'],
+            'balance_after' => $wallet->balance,
+        ]);
+
+        $this->auditLogService->log('TOPUP', [
+            'amount'         => $cached['amount'],
+            'transaction_id' => $transaction->id,
+            'source'         => 'tripay_qris',
+        ], $cached['user_id']);
+    });
+
+    $user = \App\Models\User::find($cached['user_id']);
+
+    $this->notificationService->dispatch(
+        new TopUpSuccessMail(
+            recipientName: $user->name,
+            amount:        $cached['amount'],
+            balanceAfter:  $user->wallet->fresh()->balance,
+            transactedAt:  now()->toDateTimeString(),
+        ),
+        $user,
+    );
+
+    Cache::forget('topup_charge:' . $merchantRef);
+}
 }

@@ -3,6 +3,9 @@ import ProtectedLayout from '../components/layout/ProtectedLayout'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import DashboardPage from '../pages/home/Dashboard'
+import TransferPage from '../pages/home/TransferPage'
+import HistoryPage from '../pages/home/HistoryPage'
+import ProfilePage from '../pages/home/ProfilePage'
 import TranslationManager from '../pages/admin/TranslationManager'
 import useAuthStore from '../stores/authStore'
 import LandingPage from '../pages/LandingPage'
@@ -19,10 +22,13 @@ const router = createBrowserRouter([
   { path: '/login',    element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
 
-  {
+ {
     element: <ProtectedLayout />,
     children: [
       { path: '/dashboard', element: <DashboardPage /> },
+      { path: '/transfer',  element: <TransferPage /> },
+      { path: '/history',   element: <HistoryPage /> },
+      { path: '/profile',   element: <ProfilePage /> },
     ],
   },
 

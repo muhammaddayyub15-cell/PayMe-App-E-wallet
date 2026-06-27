@@ -5,7 +5,8 @@ use App\Exceptions\ReceiverNotFoundException;
 use App\Exceptions\SelfTransferException;
 use App\Http\Middleware\CheckAccountLockout;
 use App\Http\Middleware\EnsureIdempotency;
-use App\Http\Middleware\EnsureTokenFromCookie;
+use App\Mail\TransferFailedMail;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,11 +20,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->statefulApi();
+
+        // Security headers — aktif di semua environment, HSTS hanya production
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdminRole::class,
             'lockout' => CheckAccountLockout::class,
-            'token.cookie' => EnsureTokenFromCookie::class,
             'idempotency' => EnsureIdempotency::class,
+            'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+            'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -33,6 +40,20 @@ return Application::configure(basePath: dirname(__DIR__))
         // Controller (mis. dilempar dari Service lain di masa depan tanpa catch).
         // Lihat 02-system-structure.md §11 — format ikut Error Response Standard.
         $exceptions->render(function (InsufficientBalanceException $e, Request $request) {
+            // Sender sudah pasti $request->user() — exception ini hanya terlempar
+            // dari dalam TransferService::execute() yang dipanggil setelah auth:sanctum.
+            // Lihat 02-system-structure.md §5.2 — "Gagal (saldo kurang) → kirim TransferFailedMail".
+            if ($request->user()) {
+                app(NotificationService::class)->dispatch(
+                    new TransferFailedMail(
+                        recipientName: $request->user()->name,
+                        reason: $e->getMessage(),
+                        attemptedAt: now()->toDateTimeString(),
+                    ),
+                    $request->user(),
+                );
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

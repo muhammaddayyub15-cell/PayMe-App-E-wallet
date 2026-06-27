@@ -1,22 +1,31 @@
 import { useState } from 'react'
 import { transfer } from '../../api/transactionApi'
+import { sendOtp } from '../../api/otpApi'
 import useWalletStore from '../../stores/walletStore'
 import useToastStore from '../../stores/toastStore'
 import Input from '../ui/Input'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
+import OtpModal from './OtpModal'
 import { formatRupiah } from '../../utils/formatCurrency'
+import { generateIdempotencyKey } from '../../utils/idempotency'
 import { validateTransferAmount, validateReceiver, validateSufficient } from '../../utils/validators'
 
 
 export default function TransferForm({ onSuccess, onCancel }) {
-  const [form, setForm]             = useState({ receiver_identifier: '', amount: '' })
-  const [errors, setErrors]         = useState({})
-  const [isLoading, setIsLoading]   = useState(false)
+  const [form, setForm] = useState({ receiver_identifier: '', amount: '' })
+  const [errors, setErrors] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showOtp, setShowOtp] = useState(false)
+  // Dibuat sekali per submit-session (saat handleReview), dipakai ulang untuk
+  // retry setelah OTP — supaya request pertama (403 otp_required) dan request
+  // kedua (setelah verify OTP) dianggap transaksi yang sama oleh EnsureIdempotency.
+  const [idempotencyKey, setIdempotencyKey] = useState(null)
+  const [otpVerified, setOtpVerified] = useState(false)
 
-  const balance      = useWalletStore(s => s.balance)
-  const setWallet    = useWalletStore(s => s.setWallet)
+  const balance = useWalletStore(s => s.balance)
+  const setWallet = useWalletStore(s => s.setWallet)
   const { addToast } = useToastStore()
 
   // Validasi client-side 
@@ -44,36 +53,51 @@ export default function TransferForm({ onSuccess, onCancel }) {
     setErrors(er => ({ ...er, [name]: null }))
   }
 
-  // Step 1 — validasi → tampil modal konfirmasi
+  // Step 1 — validasi → generate idempotency key baru → tampil modal konfirmasi
   const handleReview = () => {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
+    setIdempotencyKey(generateIdempotencyKey())
     setShowConfirm(true)
   }
 
-  // Step 2 — eksekusi transfer setelah konfirmasi
-  const handleConfirm = async () => {
+  // Step 2 — eksekusi transfer setelah konfirmasi (cek OTP grace period dulu)
+  const executeTransfer = async (isOtpVerified = false) => {
     setIsLoading(true)
     try {
-      const res = await transfer(form.receiver_identifier, parseInt(form.amount, 10))
+      const res = await transfer(form.receiver_identifier, parseInt(form.amount, 10), idempotencyKey, isOtpVerified || otpVerified)
       const data = res.data.data
 
-      // Update saldo di store setelah transfer
-      if (balance !== null) {
-        setWallet({ balance: balance - parseInt(form.amount, 10), currency: 'IDR' })
-      }
+      // Saldo diambil dari balance_after milik server, BUKAN dihitung manual
+      // di frontend — server adalah satu-satunya sumber kebenaran saldo.
+      setWallet({ balance: data.balance_after, currency: 'IDR' })
 
       addToast(
         `Transfer ${formatRupiah(data.amount)} ke ${data.receiver_name} berhasil!`,
         'success'
       )
+      setOtpVerified(false)
       setShowConfirm(false)
       onSuccess?.()
     } catch (err) {
-      const data   = err?.response?.data
+      const data = err?.response?.data
       const status = err?.response?.status
 
       setShowConfirm(false)
+
+      // Backend minta OTP — kirim OTP ke email lalu tampil modal
+      if (status === 403 && data?.otp_required) {
+        try {
+          await sendOtp()
+          console.log('OTP sent — showing modal')
+          setShowOtp(true)
+        } catch (otpErr) {
+          console.error('OTP send failed:', otpErr?.response?.data)
+          addToast('Gagal mengirim OTP. Coba lagi.', 'error')
+        }
+        return
+      }
+      console.log('status:', status, 'data:', data)
 
       if (status === 422) {
         setErrors(data?.errors ?? {})
@@ -93,13 +117,27 @@ export default function TransferForm({ onSuccess, onCancel }) {
     }
   }
 
-  const amount    = parseInt(form.amount || '0', 10)
-  const afterBal  = balance !== null ? balance - amount : null
+  const handleConfirm = () => executeTransfer(false)
+
+  const amount = parseInt(form.amount || '0', 10)
+  const afterBal = balance !== null ? balance - amount : null
   const isDisabled = !form.receiver_identifier || !form.amount
     || Object.values(errors).some(Boolean) || isLoading
 
   return (
     <>
+      {/* OTP Modal — muncul ketika backend minta verifikasi OTP */}
+      {showOtp && (
+        <OtpModal
+          onVerified={() => {
+            setShowOtp(false)
+          setOtpVerified(true)
+          executeTransfer(true)
+          }}
+          onClose={() => setShowOtp(false)}
+        />
+      )}
+
       {/* Konfirmasi modal */}
       <Modal
         isOpen={showConfirm}

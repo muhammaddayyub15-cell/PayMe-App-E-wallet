@@ -7,13 +7,9 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Auth\AuthenticationException;
-use Symfony\Component\HttpFoundation\Cookie;
 
 class LoginController extends Controller
 {
-    private const ACCESS_TOKEN_TTL_MINUTES = 30;
-    private const REFRESH_TOKEN_TTL_MINUTES = 60 * 24 * 7;
-
     public function __construct(
         private AuthService $authService
     ) {}
@@ -21,6 +17,13 @@ class LoginController extends Controller
     /**
      * POST /api/login — lihat 04-api-documentation.md §3.2.
      * Token TIDAK dikirim di response body — hanya via Set-Cookie httpOnly.
+     *
+     * Response tambahan untuk 2FA (lihat AuthService::login()):
+     *   200 + { requires_2fa: true } -> password benar, FE wajib tampilkan
+     *                                    input kode TOTP lalu re-submit
+     *                                    /api/login dengan field totp_code
+     *   200 + UserResource biasa     -> login tuntas (2FA tidak aktif ATAU
+     *                                    totp_code sudah benar)
      */
     public function __invoke(LoginRequest $request)
     {
@@ -28,6 +31,7 @@ class LoginController extends Controller
             $result = $this->authService->login(
                 $request->input('email'),
                 $request->input('password'),
+                $request->input('totp_code'),
             );
         } catch (AuthenticationException $e) {
             return response()->json([
@@ -36,41 +40,24 @@ class LoginController extends Controller
             ], 401);
         }
 
-        $response = (new UserResource($result['user']))
+        // Password benar, tapi 2FA aktif dan kode belum/belum valid dikirim.
+        // Sesi BELUM dibuat — tidak ada cookie session di response ini.
+        if (! empty($result['requires_2fa'])) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Masukkan kode 2FA untuk melanjutkan.',
+                'data' => [
+                    'requires_2fa' => true,
+                ],
+            ], 200);
+        }
+
+        return (new UserResource($result['user']))
             ->additional([
                 'success' => true,
                 'message' => 'Login berhasil.',
             ])
             ->response()
             ->setStatusCode(200);
-
-        return $response
-            ->withCookie($this->makeTokenCookie('access_token', $result['access_token'], self::ACCESS_TOKEN_TTL_MINUTES))
-            ->withCookie($this->makeTokenCookie('refresh_token', $result['refresh_token'], self::REFRESH_TOKEN_TTL_MINUTES));
-    }
-
-    /**
-     * Cookie httpOnly, secure, samesite=strict — sesuai BRD §4.1 item #07.
-     *
-     * Di environment local, `secure` di-set false dan `sameSite` di-set 'lax'
-     * agar cookie tetap terkirim saat testing via Postman/localhost HTTP
-     * (browser menolak cookie `secure=true` di koneksi non-HTTPS).
-     * Production WAJIB tetap secure=true, sameSite=strict.
-     */
-    private function makeTokenCookie(string $name, string $value, int $minutes): Cookie
-    {
-        $isLocal = app()->environment('local');
-
-        return cookie(
-            name: $name,
-            value: $value,
-            minutes: $minutes,
-            path: '/',
-            domain: null,
-            secure: ! $isLocal,
-            httpOnly: true,
-            raw: true,
-            sameSite: $isLocal ? 'lax' : 'strict', // untuk production harus strict
-        );
     }
 }

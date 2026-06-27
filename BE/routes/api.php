@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\RefreshTokenController;
 use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\TransactionController;
@@ -14,6 +13,7 @@ use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,11 +27,6 @@ Route::post('/register', RegisterController::class);
 Route::post('/login', LoginController::class)
     ->middleware(['lockout', 'throttle:5,1']);
 
-// Refresh access_token via refresh_token cookie — lihat RefreshTokenController.
-// Public route: validasi dilakukan manual di controller, bukan via auth:sanctum,
-// karena guard tersebut memvalidasi access_token, bukan refresh_token.
-Route::post('/refresh', RefreshTokenController::class)
-    ->middleware('throttle:10,1');
 
 // Webhook Tripay — validasi signature di controller, bukan via auth
 Route::post('/webhook/tripay', [WebhookController::class, 'handleTripay']);
@@ -45,9 +40,17 @@ Route::get('/languages/{locale}', [LanguageController::class, 'show']);
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['token.cookie', 'auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     Route::post('/logout', LogoutController::class);
+
+     // Two-Factor Authentication (TOTP) — setup/confirm/disable
+    Route::prefix('2fa')->group(function () {
+        Route::post('/setup', [TwoFactorController::class, 'setup']);
+        Route::post('/confirm', [TwoFactorController::class, 'confirm']);
+        Route::post('/disable', [TwoFactorController::class, 'disable']);
+        Route::post('/verify-totp', [TwoFactorController::class, 'verifyLogin']);
+    });
 
     // Wallet & Top-Up — §4
     Route::get('/wallet', [WalletController::class, 'show']);
@@ -55,6 +58,10 @@ Route::middleware(['token.cookie', 'auth:sanctum'])->group(function () {
 
     // Top-Up QRIS Phase 2
     Route::post('/topup/create-charge', [TopUpGatewayController::class, 'createCharge']);
+
+    // OTP untuk transfer
+    Route::post('/otp/send', [App\Http\Controllers\Auth\OtpController::class, 'send']);
+    Route::post('/otp/verify', [App\Http\Controllers\Auth\OtpController::class, 'verify']);
 
     // Transfer — §5 — idempotency + rate limit 20 req/jam
     Route::post('/transfer', [TransferController::class, 'store'])

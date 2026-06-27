@@ -38,9 +38,9 @@ class TransferService
      * @throws SelfTransferException
      * @throws InsufficientBalanceException
      */
-    public function execute(User $sender, string $receiverIdentifier, int $amount): array
+   public function execute(User $sender, string $receiverIdentifier, int $amount, ?string $idempotencyKey = null): array
     {
-        $result = DB::transaction(function () use ($sender, $receiverIdentifier, $amount) {
+        $result = DB::transaction(function () use ($sender, $receiverIdentifier, $amount, $idempotencyKey) {
             // 1. Resolve receiver
             $receiver = $this->userRepository->findByEmailOrPhone($receiverIdentifier);
 
@@ -82,7 +82,7 @@ class TransferService
                 'amount' => $amount,
                 'balance_after' => $senderWallet->balance,
                 'related_wallet_id' => $receiverWallet->id,
-                'idempotency_key' => null, // diisi oleh middleware idempotency, lihat EnsureIdempotency
+                'idempotency_key' => $idempotencyKey,
             ]);
 
             $this->transactionRepository->create([

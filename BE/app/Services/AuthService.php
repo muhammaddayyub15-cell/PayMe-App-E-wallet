@@ -5,18 +5,15 @@ namespace App\Services;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\WalletRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
-    /**
-     * Access token hidup 30 menit, refresh token hidup 7 hari — sesuai BRD §4.1.
-     * Disimpan sebagai dua httpOnly cookie terpisah, BUKAN dikirim di body response.
-     */
-    private const ACCESS_TOKEN_TTL_MINUTES = 30;
-    private const REFRESH_TOKEN_TTL_MINUTES = 60 * 24 * 7; // 7 hari
+    // Session lifetime dikontrol via SESSION_LIFETIME di .env (default 120 menit).
+    // Tidak ada access/refresh token manual — Sanctum SPA session handle otomatis.
 
     private const MAX_LOGIN_ATTEMPTS = 5;
     private const LOCKOUT_MINUTES = 15;
@@ -25,21 +22,21 @@ class AuthService
         private UserRepositoryInterface $userRepository,
         private WalletRepositoryInterface $walletRepository,
         private AuditLogService $auditLogService,
+        private TwoFactorService $twoFactorService,
     ) {}
 
     /**
      * Register user baru + buat wallet saldo 0 dalam satu transaction.
-     * Lihat 02-system-structure.md §4.1.
      */
     public function register(array $data): User
     {
         return DB::transaction(function () use ($data) {
             $user = $this->userRepository->create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
+                'name'     => $data['name'],
+                'email'    => $data['email'],
+                'phone'    => $data['phone'],
                 'password' => Hash::make($data['password']),
-                'role' => 'customer',
+                'role'     => 'customer',
             ]);
 
             $this->walletRepository->createForUser($user);
@@ -53,13 +50,21 @@ class AuthService
     }
 
     /**
-     * Verifikasi kredensial, generate access + refresh token.
-     * Lockout & rate limit dicek di middleware/Request layer SEBELUM method ini dipanggil.
+     * Verifikasi kredensial, login via Sanctum SPA session.
+     * Lockout & suspension dicek di CheckAccountLockout middleware SEBELUM method ini dipanggil.
      *
-     * @return array{user: User, access_token: string, refresh_token: string}
+     * Jika user punya 2FA aktif:
+     *   - $totpCode tidak dikirim / kosong  -> return ['requires_2fa' => true], TIDAK login
+     *   - $totpCode dikirim tapi salah      -> throw AuthenticationException
+     *   - $totpCode dikirim dan benar       -> lanjut login seperti biasa
+     *
+     * Session/cookie HANYA di-set Sanctum setelah kedua faktor (password + TOTP,
+     * kalau aktif) lolos — bukan setelah password saja.
+     *
+     * @return array{user: User, requires_2fa?: bool}
      * @throws \Illuminate\Auth\AuthenticationException
      */
-    public function login(string $email, string $password): array
+    public function login(string $email, string $password, ?string $totpCode = null): array
     {
         $user = $this->userRepository->findByEmail($email);
 
@@ -73,67 +78,49 @@ class AuthService
             throw new \Illuminate\Auth\AuthenticationException('Email atau password salah.');
         }
 
+        // ── Step 2FA — password sudah benar, cek apakah TOTP diperlukan ──
+        if ($user->hasTwoFactorEnabled()) {
+            if (! $totpCode) {
+                // Password benar tapi belum kirim kode TOTP.
+                // BELUM Auth::login() — sesi belum aktif, hanya sinyal ke FE
+                // untuk menampilkan step input kode.
+                return ['user' => $user, 'requires_2fa' => true];
+            }
+
+            if (! $this->twoFactorService->verifyCode($user, $totpCode)) {
+                $this->recordFailedAttempt($email);
+
+                $this->auditLogService->log('LOGIN_FAILED', [
+                    'email' => $email,
+                    'reason' => 'invalid_totp',
+                ], $user->id);
+
+                throw new \Illuminate\Auth\AuthenticationException('Kode 2FA tidak valid.');
+            }
+        }
+
         $this->resetFailedAttempts($email);
 
-        // Revoke token lama supaya tidak menumpuk di personal_access_tokens
-        $user->tokens()->delete();
-
-        $accessToken = $user->createToken(
-            name: 'access_token',
-            abilities: ['access'],
-            expiresAt: now()->addMinutes(self::ACCESS_TOKEN_TTL_MINUTES),
-        )->plainTextToken;
-
-        $refreshToken = $user->createToken(
-            name: 'refresh_token',
-            abilities: ['refresh'],
-            expiresAt: now()->addMinutes(self::REFRESH_TOKEN_TTL_MINUTES),
-        )->plainTextToken;
+        Auth::login($user);
+        request()->session()->regenerate();
 
         $this->auditLogService->log('LOGIN_SUCCESS', [
             'email' => $user->email,
         ], $user->id);
 
-        return [
-            'user' => $user,
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
-        ];
+        return ['user' => $user];
     }
 
     /**
-     * Revoke seluruh token milik user yang sedang login.
+     * Logout via Sanctum SPA session — invalidate session + clear cookie.
      */
     public function logout(User $user): void
     {
-        $user->tokens()->delete();
-
         $this->auditLogService->log('LOGOUT', [], $user->id);
-    }
 
-    /**
-     * Terbitkan access_token baru menggunakan refresh_token yang masih valid.
-     * Dipanggil dari RefreshTokenController setelah refresh_token divalidasi
-     * via ability 'refresh'. Refresh_token LAMA tidak di-revoke — tetap
-     * hidup sampai TTL 7 hari aslinya atau sampai logout manual. Hanya
-     * access_token lama yang diganti agar tidak menumpuk di
-     * personal_access_tokens.
-     *
-     * @return array{access_token: string}
-     */
-    public function refreshAccessToken(User $user): array
-    {
-        $user->tokens()
-            ->where('name', 'access_token')
-            ->delete();
-
-        $accessToken = $user->createToken(
-            name: 'access_token',
-            abilities: ['access'],
-            expiresAt: now()->addMinutes(self::ACCESS_TOKEN_TTL_MINUTES),
-        )->plainTextToken;
-
-        return ['access_token' => $accessToken];
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
     }
 
     /**
@@ -146,7 +133,7 @@ class AuthService
 
     private function recordFailedAttempt(string $email): void
     {
-        $key = $this->lockoutCacheKey($email);
+        $key      = $this->lockoutCacheKey($email);
         $attempts = (int) Cache::get($key, 0) + 1;
 
         Cache::put($key, $attempts, now()->addMinutes(self::LOCKOUT_MINUTES));

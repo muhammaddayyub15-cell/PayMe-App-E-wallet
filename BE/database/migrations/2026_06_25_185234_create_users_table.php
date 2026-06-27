@@ -16,6 +16,13 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['customer', 'admin'])->default('customer');
             $table->boolean('is_suspended')->default(false);
+
+            // ── Two-Factor Authentication (TOTP) ──────────────────────────
+            // two_factor_secret       : TOTP secret, dienkripsi at-rest via cast 'encrypted' di User.php
+            // two_factor_confirmed_at : null = 2FA belum aktif, terisi = 2FA aktif
+            $table->text('two_factor_secret')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
 

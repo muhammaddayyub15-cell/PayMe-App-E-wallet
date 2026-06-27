@@ -1,4 +1,3 @@
-// src/hooks/useWallet.js
 import { useEffect, useCallback } from 'react'
 import useWalletStore from '../stores/walletStore'
 import useToastStore from '../stores/toastStore'
@@ -26,5 +25,12 @@ export default function useWallet() {
     fetchWallet()
   }, [fetchWallet])
 
-  return { balance, formatted, isLoading, error, refetch: fetchWallet }
+const topUp = useCallback(async (amount) => {
+    const res = await import('../api/walletApi').then(m => m.topUp(amount))
+    setWallet(res.data.data)
+    return res
+  }, [])
+
+  return { balance, formatted, isLoading, error, refetch: fetchWallet, topUp }
 }
+

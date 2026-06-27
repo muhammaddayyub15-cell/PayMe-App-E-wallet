@@ -1,23 +1,23 @@
-import { useCallback } from 'react'
-import { login as loginApi, logout as logoutApi } from '../api/authApi'
-import useAuthStore from '../stores/authStore'
-import useWalletStore from '../stores/walletStore'
+    import { useCallback } from 'react'
+    import { login as loginApi, logout as logoutApi } from '../api/authApi'
+    import useAuthStore from '../stores/authStore'
+    import useWalletStore from '../stores/walletStore'
 
-export default function useAuth() {
-  const { user, isAuthenticated, setUser, clear } = useAuthStore()
-  const resetWallet = useWalletStore(s => s.reset)
+    export default function useAuth() {
+    const { user, isAuthenticated, setUser, clear } = useAuthStore()
+    const resetWallet = useWalletStore(s => s.reset)
 
-  const login = useCallback(async (email, password) => {
-    const res = await loginApi(email, password)
-    setUser(res.data.data)
-    return res
-  }, [setUser])
+    const login = useCallback(async (email, password, totpCode) => {
+        const res = await loginApi(email, password, totpCode)
+        if (res?.data?.data) setUser(res.data.data)
+        return res
+    }, [setUser])
 
-  const logout = useCallback(async () => {
-    try { await logoutApi() } catch { /* tetap clear meski API gagal */ }
-    clear()
-    resetWallet()
-  }, [clear, resetWallet])
+    const logout = useCallback(async () => {
+        try { await logoutApi() } catch { /* tetap clear meski API gagal */ }
+        clear()
+        resetWallet()
+    }, [clear, resetWallet])
 
-  return { user, isAuthenticated, login, logout }
-}
+    return { user, isAuthenticated, login, logout }
+    }
